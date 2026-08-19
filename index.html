@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vemedim - Thử Thách Bác Sĩ Thú Y Tương Lai</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            200: '#fed7aa',
+                            300: '#fdba74',
+                            400: '#fb923c',
+                            500: '#f97316', // Primary Orange
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
+                        },
+                        dark: '#1e1b4b', // Deep purple-blue for contrast (from reference image)
+                        card: '#ffffff',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
+                        'floating': '0 20px 40px -15px rgba(249,115,22,0.3)', // Orange tinted shadow
+                    },
+                    borderRadius: {
+                        '3xl': '1.5rem',
+                        '4xl': '2rem',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            /* Subtly tinted background to make white cards pop */
+            background-image: linear-gradient(to bottom, #fff7ed, #f8fafc);
+            color: #334155;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Mobile Container styling */
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f9fafb;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.1);
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            padding: 1.5rem;
+            padding-bottom: 6rem; /* Space for bottom nav */
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card Styles inspired by reference */
+        .glass-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0,0,0,0.03);
+            overflow: hidden;
+        }
+
+        /* Option Item (Radio style list) */
+        .option-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: white;
+            border-radius: 16px;
+            border: 2px solid #f1f5f9;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .option-item:active {
+            transform: scale(0.98);
+        }
+        .option-item.selected {
+            border-color: #f97316; /* Brand orange */
+            background-color: #fff7ed;
+            box-shadow: 0 4px 15px -3px rgba(249, 115, 22, 0.15);
+        }
+        
+        .option-radio {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            margin-right: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .option-item.selected .option-radio {
+            border-color: #f97316;
+            background-color: #f97316;
+        }
+        .option-item.selected .option-radio::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: white;
+            font-size: 12px;
+        }
+
+        /* Bottom Navigation Bar Removed */
+
+        /* Progress Dots */
+        .progress-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin: 1.5rem 0;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .dot.active {
+            background-color: #f97316;
+            width: 20px;
+            border-radius: 4px;
+        }
+
+        /* Primary Button */
+        .btn-primary {
+            background: #f97316;
+            color: white;
+            font-weight: 700;
+            padding: 1rem;
+            border-radius: 99px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 20px -5px rgba(249,115,22,0.4);
+            transition: transform 0.1s;
+            border: none;
+        }
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+        .btn-primary:disabled {
+            background: #cbd5e1;
+            box-shadow: none;
+        }
+
+        /* Secondary Tag */
+        .tag {
+            background: #fff7ed;
+            color: #ea580c;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        /* Image styling */
+        .product-img-container {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+            padding: 4px;
+        }
+        .product-img-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* Confetti */
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 4px;
+            opacity: 0;
+        }
+        @keyframes fall {
+            0% { opacity: 1; top: -10px; transform: translateX(0) rotate(0deg); }
+            100% { opacity: 0; top: 100vh; transform: translateX(50px) rotate(360deg); }
+        }
+        
+        /* Trạng thái đáp án Đúng/Sai */
+        .correct-answer {
+            border-color: #22c55e !important;
+            background-color: #f0fdf4 !important;
+        }
+        .correct-answer .option-radio {
+            background-color: #22c55e !important;
+            border-color: #22c55e !important;
+        }
+        .correct-answer .option-radio::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: white;
+            font-size: 12px;
+        }
+
+        .wrong-answer {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+            animation: shake 0.4s;
+        }
+        .wrong-answer .option-radio {
+            background-color: #ef4444 !important;
+            border-color: #ef4444 !important;
+        }
+        .wrong-answer .option-radio::after {
+            content: '\f00d'; /* Dấu X */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: white;
+            font-size: 12px;
+        }
+
+        .correct-reveal {
+            border-color: #22c55e !important;
+            border-style: dashed !important;
+            background-color: #f0fdf4 !important;
+            opacity: 0.8;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Hide scrollbar but keep functionality */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- ================= INTRO SCREEN ================= -->
+        <div id="intro-screen" class="screen active relative overflow-hidden">
+            <!-- Decorative background elements -->
+            <div class="absolute -top-20 -right-20 w-64 h-64 bg-brand-100 rounded-full blur-3xl opacity-60"></div>
+            <div class="absolute top-40 -left-20 w-48 h-48 bg-orange-100 rounded-full blur-3xl opacity-60"></div>
+
+            <div class="flex justify-between items-center mb-8 relative z-10">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center text-white shadow-lg">
+                        <i class="fas fa-paw"></i>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight">Vemedim</span>
+                </div>
+            </div>
+
+            <div class="text-left mb-6 relative z-10 mt-4">
+                <h1 class="text-4xl font-extrabold text-dark leading-tight mb-2">Thử Thách<br><span class="text-brand-500">Bác Sĩ Thú Y</span></h1>
+                <p class="text-gray-500 mt-2 text-sm leading-relaxed">Nâng cao kỹ năng chẩn đoán lâm sàng với các tình huống thực tế và kết nối cùng cộng đồng Vemedim.</p>
+            </div>
+
+            <div class="relative z-10 mb-8 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 pl-2">Thông tin người chơi</label>
+                    <input type="text" id="student-name" placeholder="Nhập họ và tên của bạn" class="w-full px-5 py-4 rounded-2xl border-2 border-white shadow-sm bg-white/60 backdrop-blur-sm focus:bg-white focus:border-brand-400 focus:outline-none transition-all text-dark font-medium placeholder-gray-400">
+                </div>
+                <div>
+                    <input type="tel" id="student-phone" placeholder="Số điện thoại" class="w-full px-5 py-4 rounded-2xl border-2 border-white shadow-sm bg-white/60 backdrop-blur-sm focus:bg-white focus:border-brand-400 focus:outline-none transition-all text-dark font-medium placeholder-gray-400">
+                </div>
+                <div>
+                    <input type="text" id="student-workplace" placeholder="Đơn vị công tác (Trường, Trạm, Phòng khám...)" class="w-full px-5 py-4 rounded-2xl border-2 border-white shadow-sm bg-white/60 backdrop-blur-sm focus:bg-white focus:border-brand-400 focus:outline-none transition-all text-dark font-medium placeholder-gray-400">
+                </div>
+                <p id="reg-error" class="text-red-500 text-sm hidden font-medium pl-2"><i class="fas fa-exclamation-circle mr-1"></i> Vui lòng nhập đầy đủ thông tin</p>
+            </div>
+
+            <div class="mt-auto relative z-10 pb-6">
+                <button onclick="startQuiz()" class="btn-primary flex items-center justify-center gap-2">
+                    Bắt đầu ngay <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= QUIZ SCREEN ================= -->
+        <div id="quiz-screen" class="screen">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="confirmExit()" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 text-gray-500 active:scale-95">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="font-bold text-dark text-sm bg-white px-4 py-2 rounded-full shadow-sm">
+                    Ca bệnh <span id="current-q-num" class="text-brand-500">1</span>/5
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="glass-card p-6 mb-6">
+                <div class="tag mb-4">TÌNH HUỐNG</div>
+                <h2 id="question-text" class="text-lg font-bold text-dark leading-snug mb-2">
+                    <!-- Question goes here -->
+                </h2>
+                <p class="text-sm text-brand-700 font-medium mt-4 bg-brand-50 p-3 rounded-xl border border-brand-100">
+                    <i class="fas fa-map-marker-alt mr-1"></i> Hãy đến bàn của Vemedim và xem các sản phẩm trưng bày để chọn giải pháp phù hợp nhất nhé!
+                </p>
+            </div>
+
+            <!-- Progress -->
+            <div id="progress-dots" class="progress-dots mb-6">
+                <!-- Dots generated JS -->
+            </div>
+
+            <div class="mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider pl-2">Chọn sản phẩm chỉ định</div>
+            
+            <!-- Options List -->
+            <div id="options-container" class="flex-1 overflow-y-auto mb-6 pb-4">
+                <!-- Options generated JS -->
+            </div>
+        </div>
+
+        <!-- ================= RESULT SCREEN ================= -->
+        <div id="result-screen" class="screen bg-white text-dark">
+            <div class="text-center mt-10 mb-8 relative z-10">
+                <div id="result-icon-container" class="w-24 h-24 bg-brand-50 rounded-full mx-auto flex items-center justify-center mb-6">
+                    <i id="result-icon" class="fas fa-trophy text-4xl text-brand-500"></i>
+                </div>
+                <h2 id="result-title" class="text-3xl font-extrabold mb-2 text-dark">Xuất sắc!</h2>
+                <div class="text-brand-600 font-bold text-lg mb-4 bg-brand-50 inline-block px-4 py-1 rounded-full border border-brand-100">
+                    <span id="result-score">100</span> Điểm
+                </div>
+                <p id="result-message" class="text-gray-500 text-sm px-4 leading-relaxed">
+                    Bạn có nền tảng kiến thức rất tốt.
+                </p>
+            </div>
+
+            <!-- Reward Card (Replaced with Fanpage Follow) -->
+            <div id="reward-section" class="bg-white rounded-3xl p-6 text-dark mt-4 mb-8 shadow-soft border border-gray-100">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 text-3xl">
+                        <i class="fab fa-facebook"></i>
+                    </div>
+                    <div class="text-left">
+                        <h3 class="font-bold text-dark">Follow Fanpage</h3>
+                        <p class="text-xs text-gray-500">Vemedim for pets</p>
+                    </div>
+                </div>
+                <button onclick="openFacebookPage()" class="w-full bg-[#0866ff] hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-2">
+                    <i class="fab fa-facebook-f text-lg"></i> Follow Fanpage Ngay
+                </button>
+            </div>
+
+            <div class="mt-auto space-y-3 pb-24 z-10">
+                <button onclick="showReview()" class="btn-primary">
+                    Xem Lại Bài Làm
+                </button>
+                <button onclick="resetQuiz()" class="w-full text-brand-500 font-bold py-4 active:opacity-70 bg-brand-50 rounded-full border border-brand-100">
+                    Làm Lại Lần Nữa
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= REVIEW SCREEN ================= -->
+        <div id="review-screen" class="screen">
+            <div class="flex items-center mb-6 sticky top-0 bg-gray-50 py-2 z-20">
+                <button onclick="closeReview()" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 text-gray-500 active:scale-95 mr-4">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 class="text-xl font-bold text-dark">Chi Tiết Bài Làm</h2>
+            </div>
+            
+            <div id="review-content" class="space-y-6 pb-24 overflow-y-auto">
+                <!-- Content generated JS -->
+            </div>
+        </div>
+
+        <!-- Confetti -->
+        <div id="confetti-container" class="fixed inset-0 pointer-events-none z-50 hidden overflow-hidden"></div>
+    </div>
+
+    <script>
+        // --- Data Definitions ---
+        const products = {
+            probi28: {
+                id: 'probi28', name: 'Probi 28', shortDesc: 'Men vi sinh 5 tỷ lợi khuẩn',
+                image: 'PROBI 28 (6).jpg', type: 'Tiêu hóa'
+            },
+            calciTab: {
+                id: 'calciTab', name: 'Calci tab lite', shortDesc: 'Calcium hữu cơ & D3',
+                image: 'Calci TAB Lite-2.jpg', type: 'Xương khớp'
+            },
+            bromhexineCat: {
+                id: 'bromhexineCat', name: 'Bromhexine (Cat)', shortDesc: 'Hỗ trợ hô hấp cho Mèo',
+                image: 'DAP07929-Enhanced-NR (1).jpg', type: 'Hô hấp'
+            },
+            bromhexineDog: {
+                id: 'bromhexineDog', name: 'Bromhexine (Dog)', shortDesc: 'Hỗ trợ hô hấp cho Chó',
+                image: 'DSC05811-Enhanced-NR.jpg', type: 'Hô hấp'
+            },
+            exoZyme: {
+                id: 'exoZyme', name: 'EXO ZYME', shortDesc: 'Tế bào gốc mau lành vết thương',
+                image: 'EXO zyme (2).jpg', type: 'Ngoại khoa'
+            },
+            hepatylDog: {
+                id: 'hepatylDog', name: 'Hepatyl (Dog)', shortDesc: 'Giải độc gan, mật cho Chó',
+                image: 'DAP07453-Enhanced-NR.jpg', type: 'Gan mật'
+            },
+            hepatylCat: {
+                id: 'hepatylCat', name: 'Hepatyl (Cat)', shortDesc: 'Giải độc gan, mật cho Mèo',
+                image: 'DAP07453-Enhanced-NR.jpg', type: 'Gan mật'
+            },
+            prednovet: {
+                id: 'prednovet', name: 'Prednovet', shortDesc: 'Kháng viêm, chống dị ứng',
+                image: '9b936e74-8e61-46f1-82c9-6c62431ce5e4.webp', type: 'Kháng viêm'
+            },
+            tulaket: {
+                id: 'tulaket', name: 'Tulaket prefilled', shortDesc: 'Trị viêm hô hấp & kháng viêm 1 liều duy nhất',
+                image: 'ca20bee8-eabf-4bc0-a96b-ba06c2a88352.webp', type: 'Hô hấp'
+            }
+        };
+
+        // Ngân hàng câu hỏi (Sẽ random lấy 5 câu)
+        const questionPool = [
+            {
+                id: 1, text: "Chó Poodle 3 tháng tuổi ăn kém, tiêu chảy phân lỏng sau khi đổi hạt và vừa kết thúc đợt kháng sinh viêm da. Bạn sẽ khuyên dùng sản phẩm nào để phục hồi?",
+                options: ['probi28', 'hepatylDog', 'calciTab', 'exoZyme'],
+                correctAnswer: 'probi28', points: 20,
+                explanation: "Probi 28 (5 tỷ lợi khuẩn Bacillus) phục hồi hệ vi sinh sau dùng kháng sinh, giảm rối loạn tiêu hóa."
+            },
+            {
+                id: 2, text: "Golden Retriever 4 tháng tuổi đang trong giai đoạn phát triển mạnh. Chủ muốn phòng ngừa còi xương. Chọn sản phẩm tối ưu kết hợp Calcium hữu cơ & D3?",
+                options: ['probi28', 'bromhexineDog', 'calciTab', 'hepatylDog'],
+                correctAnswer: 'calciTab', points: 20,
+                explanation: "Calci tab lite chứa Calcium hữu cơ và D3 giúp hấp thu tối đa cho chó giống lớn đang phát triển."
+            },
+            {
+                id: 3, text: "Mèo ALN 2 tuổi ho khạc, chảy mũi, thở nhanh (viêm hô hấp cấp). Sản phẩm thông thoáng đường thở chuyên biệt cho MÈO là gì?",
+                options: ['bromhexineDog', 'bromhexineCat', 'exoZyme', 'probi28'],
+                correctAnswer: 'bromhexineCat', points: 20,
+                explanation: "Bromhexine (cat) thiết kế riêng cho mèo, hỗ trợ giảm ho, long đờm, có nhân sâm, cam thảo."
+            },
+            {
+                id: 4, text: "Một chú chó bị cắn nhau rách da mảng lớn. Cần tái sinh mô lành nhanh và kích thích mọc lông lại. Dùng sản phẩm công nghệ sinh học nào?",
+                options: ['hepatylDog', 'calciTab', 'exoZyme', 'bromhexineDog'],
+                correctAnswer: 'exoZyme', points: 20,
+                explanation: "EXO ZYME (dịch chiết tế bào gốc) nhỏ trực tiếp vết thương giúp mau lành, tái tạo da và mọc lông."
+            },
+            {
+                id: 5, text: "Mèo già 8 tuổi chán ăn, vàng da, có dấu hiệu tổn thương gan mật. Cần bổ sung sản phẩm giải độc gan chuyên biệt cho MÈO?",
+                options: ['hepatylDog', 'hepatylCat', 'probi28', 'calciTab'],
+                correctAnswer: 'hepatylCat', points: 20,
+                explanation: "Hepatyl (cat) chứa L-Carnitine, Methionine... phục hồi gan mật thiết kế riêng cho sinh lý của mèo."
+            },
+            {
+                id: 6, text: "Chó Phốc Sóc thường xuyên ho khẹc do thời tiết lạnh, viêm phế quản. Cần sản phẩm hỗ trợ đường hô hấp cho CHÓ?",
+                options: ['exoZyme', 'bromhexineCat', 'bromhexineDog', 'calciTab'],
+                correctAnswer: 'bromhexineDog', points: 20,
+                explanation: "Bromhexine (dog) giúp long đờm, giảm ho, thông thoáng đường hô hấp riêng cho chó."
+            },
+            {
+                id: 7, text: "Chó đang điều trị ký sinh trùng máu, phải dùng thuốc kháng sinh và thuốc đặc trị liều cao liên tục. Cần sản phẩm nào để bảo vệ gan?",
+                options: ['hepatylDog', 'probi28', 'calciTab', 'exoZyme'],
+                correctAnswer: 'hepatylDog', points: 20,
+                explanation: "Hepatyl (dog) giúp thanh lọc, thải độc và phục hồi chức năng gan khi dùng nhiều thuốc thú y."
+            },
+            {
+                id: 8, text: "Mèo con 2 tháng tuổi mới cai sữa mẹ, chuyển sang ăn dặm pate và bị đi phân lỏng nhẹ. Sản phẩm nào an toàn để ổn định đường ruột?",
+                options: ['bromhexineCat', 'exoZyme', 'probi28', 'hepatylCat'],
+                correctAnswer: 'probi28', points: 20,
+                explanation: "Probi 28 dạng nước rất dễ uống cho mèo con, cung cấp 5 tỷ lợi khuẩn giúp ổn định tiêu hóa khi đổi thức ăn."
+            },
+            {
+                id: 9, text: "Mèo mẹ đang mang thai và cho con bú, cần bổ sung khoáng chất an toàn để không bị hạ canxi huyết. Sản phẩm nào phù hợp?",
+                options: ['calciTab', 'hepatylCat', 'bromhexineCat', 'probi28'],
+                correctAnswer: 'calciTab', points: 20,
+                explanation: "Calci tab lite an toàn cho chó mèo mang thai, bổ sung Canxi, Photpho, Magie cần thiết."
+            },
+            {
+                id: 10, text: "Mèo vô tình bị bỏng nước sôi gây rát đỏ và lột da. Sau khi sát trùng, nên bôi/nhỏ gì để da nhanh liền sẹo?",
+                options: ['calciTab', 'exoZyme', 'hepatylCat', 'bromhexineCat'],
+                correctAnswer: 'exoZyme', points: 20,
+                explanation: "EXO ZYME dùng được cho các vết bỏng, viêm da mãn tính giúp kích thích tái tạo mô."
+            },
+            {
+                id: 11, text: "Chó Bulldog bị viêm da dị ứng ngứa ngáy dữ dội, cào gãi liên tục. Sau khi kiểm tra sức khỏe và chắc chắn chó không mang thai, không bị tiểu đường hay viêm loét giác mạc, bạn sẽ kê thuốc kháng viêm đường uống nào?",
+                options: ['prednovet', 'exoZyme', 'probi28', 'bromhexineDog'],
+                correctAnswer: 'prednovet', points: 20,
+                explanation: "Prednovet (Prednisolone) giúp kháng viêm, chống dị ứng hiệu quả. Điểm cộng vì bạn đã chú ý đến các chống chỉ định trước khi kê đơn (suy thận, tiểu đường, loét giác mạc, mang thai)!"
+            },
+            {
+                id: 12, text: "Chó Becgie 20kg sốt cao, ho nặng do viêm đường hô hấp cấp. Cần giải pháp vừa diệt khuẩn đường hô hấp vừa kháng viêm, hạ sốt nhanh, đồng thời tiện lợi chuẩn liều với chỉ 1 liều tiêm duy nhất. Bạn sẽ chọn sản phẩm ống tiêm nạp sẵn nào?",
+                options: ['tulaket', 'bromhexineDog', 'prednovet', 'hepatylDog'],
+                correctAnswer: 'tulaket', points: 20,
+                explanation: "Tulaket prefilled kết hợp Tulathromycin (kháng sinh đặc trị hô hấp tác dụng kéo dài) và Ketoprofen (NSAID giảm đau, hạ sốt, kháng viêm) dạng bơm tiêm thủy tinh 1 ml tiện lợi, chỉ cần tiêm 1 liều duy nhất."
+            }
+        ];
+
+        // --- State ---
+        let questions = []; // Sẽ chứa 5 câu random
+        let currentQIndex = 0;
+        let userAnswers = [];
+        let totalScore = 0;
+        let isQuestionAnswered = false; // Chặn click nhiều lần
+        
+        let studentInfo = { name: '', phone: '', workplace: '' };
+
+        // URL của Google Apps Script Web App (Thay thế bằng URL thật của bạn)
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxb3s2GaCi-28SZYG0FYOZR6iyboR7AEMZB-kk_CCIOgTgyN0-VZigLh9g1g_RLGqZg/exec";
+
+        // Helper: Random hóa mảng
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // --- Navigation ---
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        function startQuiz() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            const phoneInput = document.getElementById('student-phone').value.trim();
+            const workplaceInput = document.getElementById('student-workplace').value.trim();
+            const errorMsg = document.getElementById('reg-error');
+
+            if (!nameInput || !phoneInput || !workplaceInput) {
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+            
+            errorMsg.classList.add('hidden');
+            studentInfo.name = nameInput;
+            studentInfo.phone = phoneInput;
+            studentInfo.workplace = workplaceInput;
+
+            // Random chọn 5 câu hỏi từ Pool
+            const shuffledPool = shuffleArray([...questionPool]);
+            questions = shuffledPool.slice(0, 5);
+
+            currentQIndex = 0;
+            userAnswers = new Array(questions.length).fill(null);
+            
+            switchScreen('quiz-screen');
+            renderQuestion();
+        }
+
+        function confirmExit() {
+            if(confirm('Bạn có chắc muốn thoát? Kết quả sẽ không được lưu.')) {
+                switchScreen('intro-screen');
+            }
+        }
+
+        function renderQuestion() {
+            isQuestionAnswered = false;
+            const q = questions[currentQIndex];
+            document.getElementById('current-q-num').innerText = currentQIndex + 1;
+            document.getElementById('question-text').innerText = q.text;
+
+            // Render Dots
+            const dotsContainer = document.getElementById('progress-dots');
+            dotsContainer.innerHTML = '';
+            for(let i=0; i<questions.length; i++) {
+                const dot = document.createElement('div');
+                dot.className = `dot ${i === currentQIndex ? 'active bg-brand-500' : (i < currentQIndex ? 'bg-brand-200' : '')}`;
+                dotsContainer.appendChild(dot);
+            }
+
+            // Shuffle Options cho mỗi câu
+            const shuffledOptions = shuffleArray([...q.options]);
+
+            // Render Options
+            const optsContainer = document.getElementById('options-container');
+            optsContainer.innerHTML = '';
+            
+            shuffledOptions.forEach(optId => {
+                const p = products[optId];
+                
+                const item = document.createElement('div');
+                item.className = 'option-item';
+                item.id = `opt-card-${optId}`;
+                item.onclick = () => selectOption(optId);
+                
+                // UI mới: Không hiển thị shortDesc và tag
+                item.innerHTML = `
+                    <div class="option-radio" id="opt-radio-${optId}"></div>
+                    <div class="product-img-container shadow-sm border border-gray-50">
+                        <img src="${p.image}" alt="${p.name}">
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-dark text-base">${p.name}</h4>
+                    </div>
+                `;
+                optsContainer.appendChild(item);
+            });
+        }
+
+        function selectOption(optId) {
+            if (isQuestionAnswered) return; // Nếu đã chọn rồi thì khóa click
+            isQuestionAnswered = true;
+            
+            userAnswers[currentQIndex] = optId;
+            const q = questions[currentQIndex];
+            const isCorrect = optId === q.correctAnswer;
+
+            // Highlight lựa chọn của user
+            const selectedCard = document.getElementById(`opt-card-${optId}`);
+            
+            if (isCorrect) {
+                selectedCard.classList.add('correct-answer');
+                totalScore += q.points;
+            } else {
+                selectedCard.classList.add('wrong-answer');
+                // Chỉ ra đáp án đúng
+                const correctCard = document.getElementById(`opt-card-${q.correctAnswer}`);
+                if(correctCard) correctCard.classList.add('correct-reveal');
+            }
+
+            // Tự động chuyển câu sau 1.5s
+            setTimeout(() => {
+                nextQuestion();
+            }, 1500);
+        }
+
+        function nextQuestion() {
+            if (currentQIndex < questions.length - 1) {
+                currentQIndex++;
+                renderQuestion();
+            } else {
+                submitQuiz();
+            }
+        }
+
+        function submitQuiz() {
+            totalScore = 0;
+            userAnswers.forEach((ans, idx) => {
+                if (ans === questions[idx].correctAnswer) totalScore += questions[idx].points;
+            });
+
+            document.getElementById('result-score').innerText = totalScore;
+            
+            // --- GỬI DỮ LIỆU LÊN GOOGLE SHEET ---
+            sendDataToGoogleSheet(studentInfo.name, studentInfo.phone, studentInfo.workplace, totalScore);
+
+            const rewardSec = document.getElementById('reward-section');
+            const screen = document.getElementById('result-screen');
+            const iconContainer = document.getElementById('result-icon-container');
+            const icon = document.getElementById('result-icon');
+            const title = document.getElementById('result-title');
+            const msg = document.getElementById('result-message');
+            const scoreDisplay = document.querySelector('#result-screen > div > div.text-brand-600');
+
+            if (totalScore >= 50) {
+                // Thắng - Giao diện sáng mới
+                screen.className = "screen active bg-white text-dark"; 
+                iconContainer.className = "w-24 h-24 bg-brand-50 rounded-full mx-auto flex items-center justify-center mb-6";
+                icon.className = "fas fa-trophy text-4xl text-brand-500";
+                title.innerText = "Xuất sắc!";
+                title.className = "text-3xl font-extrabold mb-2 text-dark";
+                scoreDisplay.className = "text-brand-600 font-bold text-lg mb-4 bg-brand-50 inline-block px-4 py-1 rounded-full border border-brand-100";
+                msg.innerText = "Nền tảng kiến thức tuyệt vời. Hãy follow fanpage để cập nhật thêm nhiều thông tin hữu ích nhé!";
+                msg.className = "text-gray-500 text-sm px-4 leading-relaxed";
+                rewardSec.style.display = 'block';
+                triggerConfetti();
+            } else {
+                // Thua - Giao diện sáng
+                screen.className = "screen active bg-white text-dark"; 
+                iconContainer.className = "w-24 h-24 bg-gray-50 rounded-full mx-auto flex items-center justify-center mb-6";
+                icon.className = "fas fa-book-open text-4xl text-gray-400";
+                title.innerText = "Cố lên nhé!";
+                title.className = "text-3xl font-extrabold mb-2 text-dark";
+                scoreDisplay.className = "text-gray-600 font-bold text-lg mb-4 bg-gray-100 inline-block px-4 py-1 rounded-full";
+                msg.innerText = "Hãy xem lại bài làm để nắm vững kiến thức hơn.";
+                msg.className = "text-gray-500 text-sm px-4 leading-relaxed";
+                rewardSec.style.display = 'none';
+            }
+
+            switchScreen('result-screen');
+        }
+
+        // Hàm gửi dữ liệu qua API
+        function sendDataToGoogleSheet(name, phone, workplace, score) {
+            // Kiểm tra xem URL đã được cấu hình chưa
+            if (GOOGLE_SCRIPT_URL === "YOUR_WEB_APP_URL_HERE") {
+                console.warn("Chưa cấu hình Google Script URL. Dữ liệu không được gửi.");
+                return;
+            }
+
+            const data = {
+                name: name,
+                phone: phone,
+                workplace: workplace,
+                score: score // Gửi thêm điểm số (nếu bạn muốn lưu)
+            };
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                // Cần set mode là 'no-cors' hoặc xử lý CORS header trong Apps Script. 
+                // Script ở trên đã có hàm doOptions xử lý CORS, nên ta dùng cors bình thường hoặc bỏ trống mặc định
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8', // Dùng text/plain để tránh preflight request phức tạp trong một số trường hợp
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Đã lưu dữ liệu thành công:", data);
+            })
+            .catch((error) => {
+                console.error("Lỗi khi lưu dữ liệu:", error);
+            });
+        }
+
+        function showReview() {
+            const container = document.getElementById('review-content');
+            container.innerHTML = '';
+
+            questions.forEach((q, idx) => {
+                const uAns = userAnswers[idx];
+                const isCorrect = uAns === q.correctAnswer;
+                const uProd = uAns ? products[uAns] : null;
+                const cProd = products[q.correctAnswer];
+
+                const badge = isCorrect 
+                    ? `<span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-md">Đúng (+${q.points})</span>`
+                    : `<span class="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded-md">Sai</span>`;
+
+                let html = `
+                    <div class="glass-card p-5">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-sm font-bold text-gray-400">Câu ${idx + 1}</span>
+                            ${badge}
+                        </div>
+                        <p class="text-sm font-medium text-dark mb-4 leading-relaxed">${q.text}</p>
+                        
+                        <div class="space-y-2">
+                            <div class="flex items-center p-3 rounded-xl border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+                                <i class="${isCorrect ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-500'} mr-3 text-lg"></i>
+                                <div>
+                                    <p class="text-xs text-gray-500 mb-0.5">Bạn chọn:</p>
+                                    <p class="text-sm font-bold ${isCorrect ? 'text-green-800' : 'text-red-800'}">${uProd ? uProd.name : 'Không chọn'}</p>
+                                </div>
+                            </div>
+                            
+                            ${!isCorrect ? `
+                            <div class="flex items-center p-3 rounded-xl border bg-brand-50 border-brand-100">
+                                <i class="fas fa-check-circle text-brand-500 mr-3 text-lg"></i>
+                                <div>
+                                    <p class="text-xs text-brand-600/70 mb-0.5">Đáp án đúng:</p>
+                                    <p class="text-sm font-bold text-brand-700">${cProd.name}</p>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="mt-4 pt-4 border-t border-gray-100">
+                            <p class="text-xs text-gray-500"><i class="fas fa-lightbulb text-yellow-500 mr-1"></i> ${q.explanation}</p>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+
+            switchScreen('review-screen');
+        }
+
+        function closeReview() {
+            switchScreen('result-screen');
+        }
+
+        function resetQuiz() {
+            // Reset result styling overrides if they failed previously
+            const screen = document.getElementById('result-screen');
+            const iconContainer = document.getElementById('result-icon-container');
+            const title = document.getElementById('result-title');
+            // Cập nhật lại selector cho đúng với cấu trúc HTML mới của thẻ chứa điểm
+            const scoreDisplay = document.querySelector('#result-screen > div > div.font-bold'); 
+            
+            screen.className = "screen bg-white text-dark"; // Sửa lại mặc định cũng là nền sáng
+            iconContainer.className = "w-24 h-24 bg-brand-50 rounded-full mx-auto flex items-center justify-center mb-6";
+            title.className = "text-3xl font-extrabold mb-2 text-dark";
+            if(scoreDisplay) {
+                 scoreDisplay.className = "text-brand-600 font-bold text-lg mb-4 bg-brand-50 inline-block px-4 py-1 rounded-full border border-brand-100";
+            }
+            
+            switchScreen('intro-screen');
+        }
+
+        function openFacebookPage() {
+            const fbUrl = 'https://www.facebook.com/page.vmp.2025/';
+            // Mở liên kết Facebook trên cửa sổ mới. 
+            // Trên smartphone, trình duyệt sẽ tự nhận diện domain và hỏi người dùng mở bằng app Facebook.
+            window.open(fbUrl, '_blank', 'noopener,noreferrer');
+        }
+
+        function triggerConfetti() {
+            const container = document.getElementById('confetti-container');
+            container.classList.remove('hidden');
+            container.innerHTML = '';
+            const colors = ['#f97316', '#fdba74', '#ffffff', '#fed7aa'];
+            for (let i = 0; i < 60; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'confetti';
+                conf.style.left = `${Math.random() * 100}vw`;
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.animation = `fall ${Math.random() * 3 + 2}s linear ${Math.random() * 1}s forwards`;
+                container.appendChild(conf);
+            }
+            setTimeout(() => container.classList.add('hidden'), 4000);
+        }
+    </script>
+</body>
+</html>
